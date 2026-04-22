@@ -18,6 +18,10 @@
     {
       "name": "auth",
       "description": "Operations related to authentication"
+    },
+    {
+      "name": "audio",
+      "description": "Operations related to audio upload and playback"
     }
   ],
   "paths": {
@@ -285,6 +289,278 @@
           }
         }
       }
+    },
+    "/audio": {
+      "get": {
+        "tags": [
+          "audio"
+        ],
+        "summary": "Get uploaded audio list",
+        "operationId": "getAudioList",
+        "description": "Get the list of uploaded audio files for the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved audio list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Audio list retrieved successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Audio"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "audio"
+        ],
+        "summary": "Upload a new audio file",
+        "operationId": "uploadAudio",
+        "description": "Upload a new audio file with metadata and optional cover image.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "audio"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "duration": {
+                    "type": "number",
+                    "example": 180
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "mp3"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "audio": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Audio uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Audio uploaded successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Audio"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/IllegalInput"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/audio/{audioId}": {
+      "get": {
+        "tags": [
+          "audio"
+        ],
+        "summary": "Get audio details",
+        "operationId": "getAudioById",
+        "description": "Get metadata and playback URL for a single audio file.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audio metadata retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Audio retrieved successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Audio"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "audio"
+        ],
+        "summary": "Delete audio",
+        "operationId": "deleteAudioById",
+        "description": "Delete an uploaded audio file and its cover from storage.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Audio deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/audio/{audioId}/duplicate": {
+      "post": {
+        "tags": [
+          "audio"
+        ],
+        "summary": "Duplicate audio",
+        "operationId": "duplicateAudioById",
+        "description": "Create a duplicate entry of the selected audio for the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Audio duplicated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Audio duplicated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Audio"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -413,6 +689,69 @@
           "message": {
             "type": "string",
             "example": "Not Found"
+          }
+        }
+      },
+      "Audio": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "60d0fe4f5311236168a109ca"
+          },
+          "userId": {
+            "type": "string",
+            "example": "60d0fe4f5311236168a109ca"
+          },
+          "title": {
+            "type": "string",
+            "example": "Chill Beat"
+          },
+          "audioUrl": {
+            "type": "string",
+            "example": "https://res.cloudinary.com/demo/raw/upload/v1234567890/audio/song.mp3"
+          },
+          "coverUrl": {
+            "type": "string",
+            "example": "https://res.cloudinary.com/demo/image/upload/v1234567890/audio_covers/cover.jpg"
+          },
+          "size": {
+            "type": "number",
+            "example": 5120000
+          },
+          "duration": {
+            "type": "number",
+            "example": 180
+          },
+          "format": {
+            "type": "string",
+            "example": "mp3"
+          },
+          "audioType": {
+            "type": "string",
+            "example": "podcast"
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "audio/mpeg"
+          },
+          "coverMimeType": {
+            "type": "string",
+            "example": "image/jpeg"
+          },
+          "description": {
+            "type": "string",
+            "example": "Relaxing audio track"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-22T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-22T10:00:00Z"
           }
         }
       },

@@ -19,17 +19,14 @@ const PORT = process.env.PORT || 3000;
 export const setupServer = () => {
   const app = express();
 
-  // JSON + URL-encoded
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // ✅ CORS для фронтенду на Vite
   app.use(cors({
     origin: "http://localhost:5173",
     credentials: true
   }));
 
-  // Логування
   app.use(
     pino({
       transport: {
@@ -40,24 +37,19 @@ export const setupServer = () => {
 
   app.use(cookieParser());
 
-  // Тестовий маршрут
   app.get('/', (req, res) => {
     res.json({
       message: 'Hello world! This index page belongs to main',
     });
   });
 
-  // ✅ Основний роутер з префіксом /api
   app.use('/api', router);
   app.use("/api/books", booksAuthRouter);
   app.use("/api/books", booksBooksRouter);
-  // Статичні файли
   app.use('/uploads', express.static(UPLOAD_DIR));
 
-  // Swagger документація
   app.use('/api-docs', swaggerDocs());
 
-  // 404 handler
   app.use('*', notFoundHandler);
   app.use(errorHandler);
 

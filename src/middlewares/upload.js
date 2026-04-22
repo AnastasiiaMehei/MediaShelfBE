@@ -1,4 +1,4 @@
-// src/middlewares/upload.js
+// src/middlewares/multer.js
 
 import multer from 'multer';
 
