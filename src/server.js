@@ -23,10 +23,9 @@ export const setupServer = () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // APP_DOMAINS=http://localhost:5173,https://media-shelf-fe-qckw.vercel.app,https://media-shelf-fe-qckw-git-main-anastasiias-projects-c479b52e.vercel.app
-  const originsEnv = process.env.APP_DOMAINS || process.env.APP_DOMAIN;
-  const allowedOrigins = originsEnv
-    ? originsEnv.split(",").map((origin) => origin.trim())
+  // APP_DOMAIN=https://media-shelf-fe-qckw-2jfchvq51-anastasiias-projects-c479b52e.vercel.app
+  const allowedOrigins = process.env.APP_DOMAIN
+    ? process.env.APP_DOMAIN.split(",").map((origin) => origin.trim())
     : ["http://localhost:5173"];
 
   app.use(cors({
