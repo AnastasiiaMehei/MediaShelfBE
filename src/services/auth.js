@@ -1,6 +1,6 @@
 // src/services/auth.js
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { UsersCollection } from '../db/models/user.js';
 import createHttpError from 'http-errors';
