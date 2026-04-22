@@ -12,6 +12,7 @@ import { swaggerDocs } from './middlewares/swaggerDocs.js';
 import { UPLOAD_DIR } from './constants/index.js';
 import booksAuthRouter from "./routers/booksAuth.js";
 import booksBooksRouter from "./routers/booksBooks.js";
+
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
@@ -22,8 +23,13 @@ export const setupServer = () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // APP_DOMAINS=http://localhost:5173,https://media-shelf-fe-qckw.vercel.app,https://media-shelf-fe-qckw-git-main-anastasiias-projects-c479b52e.vercel.app
+  const allowedOrigins = process.env.APP_DOMAINS
+    ? process.env.APP_DOMAINS.split(",")
+    : ["http://localhost:5173"];
+
   app.use(cors({
-    origin: [process.env.APP_DOMAIN, "http://localhost:5173"],
+    origin: allowedOrigins,
     credentials: true
   }));
   
@@ -55,5 +61,6 @@ export const setupServer = () => {
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`Allowed origins: ${allowedOrigins.join(", ")}`);
   });
 };
