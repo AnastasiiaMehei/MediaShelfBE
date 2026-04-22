@@ -3,7 +3,7 @@ import axios from "axios";
 
 const router = express.Router();
 
-const API = "https://readjourney.b.goit.study/api";
+const API = "https://readjourney.b.goit.study/";
 
 // ===============================
 // GET /books/recommend

@@ -3,7 +3,7 @@ import axios from "axios";
 
 const router = express.Router();
 
-const API = "https://readjourney.b.goit.study/api";
+const API = "https://readjourney.b.goit.study/";
 
 const EMAIL = "tesanastasya@gmail.com";
 const PASSWORD = "1234567";
