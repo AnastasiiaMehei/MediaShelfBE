@@ -44,8 +44,8 @@ export const setupServer = () => {
   });
 
   app.use('/api', router);
-  app.use("/api/books", booksAuthRouter);
-  app.use("/api/books", booksBooksRouter);
+  app.use("/books", booksAuthRouter);
+  app.use("/books", booksBooksRouter);
   app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use('/api-docs', swaggerDocs());
