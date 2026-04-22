@@ -26,14 +26,15 @@ export const loginUserController = async (req, res) => {
 
   const user = await UsersCollection.findById(session.userId);
 
-  res.cookie('refreshToken', session.refreshToken, {
+  const cookieOptions = {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
     expires: new Date(Date.now() + ONE_DAY * 30),
-  });
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY * 30),
-  });
+  };
+
+  res.cookie('refreshToken', session.refreshToken, cookieOptions);
+  res.cookie('sessionId', session._id, cookieOptions);
 
   res.json({
     status: 200,
@@ -83,14 +84,15 @@ export const refreshUserSessionController = async (req, res, next) => {
     refreshToken,
   });
 
-  res.cookie('refreshToken', session.refreshToken, {
+  const cookieOptions = {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
     expires: new Date(Date.now() + ONE_DAY * 30),
-  });
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY * 30),
-  });
+  };
+
+  res.cookie('refreshToken', session.refreshToken, cookieOptions);
+  res.cookie('sessionId', session._id, cookieOptions);
 
   res.json({
     status: 200,
