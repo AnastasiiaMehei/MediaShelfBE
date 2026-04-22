@@ -23,10 +23,10 @@ export const setupServer = () => {
   app.use(express.urlencoded({ extended: true }));
 
   app.use(cors({
-    origin: "http://localhost:5173",
+    origin: [process.env.APP_DOMAIN, "http://localhost:5173"],
     credentials: true
   }));
-
+  
   app.use(
     pino({
       transport: {
