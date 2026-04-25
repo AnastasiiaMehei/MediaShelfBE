@@ -46,20 +46,15 @@ src/
 
 ## 🔑 API Endpoints
 
-### Authentication
-- `POST /auth/register` – register a new user  
-- `POST /auth/login` – login user  
-- `POST /auth/logout` – logout user  
-- `POST /auth/refresh` – refresh session token  
-- `POST /auth/send-reset-email` – send password reset email  
-- `POST /auth/reset-pwd` – reset password  
+See [API_ENDPOINTS.md](API_ENDPOINTS.md) for the complete list of all available endpoints.
 
-### Audio
-- `GET /audio` – get list of uploaded audio files  
-- `POST /audio` – upload a new audio file  
-- `GET /audio/{audioId}` – get audio metadata and playback URL  
-- `DELETE /audio/{audioId}` – delete audio file  
-- `POST /audio/{audioId}/duplicate` – duplicate audio file  
+### Main Endpoints
+- `POST /api/auth/login` — user login
+- `POST /api/auth/register` — user registration
+- `GET /api/audio` — fetch audio files
+- `GET /api/movies/watchlist` — fetch watchlist movies
+- `GET /api/movies/favorites` — fetch favorite movies
+- `GET /api/books/recommend` — fetch recommended books  
 
 ---
 
