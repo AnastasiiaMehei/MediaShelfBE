@@ -12,20 +12,17 @@ export const addToWatchlist = async (userId, movieData, posterBuffer = null) => 
 
   const existingMovie = await MovieCollection.findOne({ userId, movieId });
 
-  let cloudinaryPosterUrl = posterUrl;
   let cloudinaryPublicId = null;
 
-  if (posterBuffer && posterUrl) {
+  if (posterBuffer) {
     try {
       const posterResult = await uploadToCloudinary(posterBuffer, 'movies_posters', {
         resource_type: 'image',
         folder: 'movies_posters',
       });
-      cloudinaryPosterUrl = posterResult.secure_url;
       cloudinaryPublicId = posterResult.public_id;
     } catch (error) {
-      console.warn('Cloudinary poster upload failed, using original URL', error);
-      cloudinaryPublicId = null;
+      console.warn('Cloudinary poster upload failed', error);
     }
   }
 
@@ -35,7 +32,6 @@ export const addToWatchlist = async (userId, movieData, posterBuffer = null) => 
       if (existingMovie.posterPublicId) {
         await destroyFromCloudinary(existingMovie.posterPublicId, { resource_type: 'image' }).catch(() => {});
       }
-      existingMovie.posterUrl = cloudinaryPosterUrl;
       existingMovie.posterPublicId = cloudinaryPublicId;
     }
     await existingMovie.save();
@@ -46,8 +42,8 @@ export const addToWatchlist = async (userId, movieData, posterBuffer = null) => 
     userId,
     movieId,
     title,
-    posterUrl: cloudinaryPosterUrl || null,
-    posterPublicId: cloudinaryPublicId || null,
+    posterUrl: posterUrl || null,
+    posterPublicId: cloudinaryPublicId,
     releaseDate: releaseDate || null,
     rating: rating || null,
     overview: overview || null,
@@ -68,20 +64,17 @@ export const addToFavorites = async (userId, movieData, posterBuffer = null) => 
 
   const existingMovie = await MovieCollection.findOne({ userId, movieId });
 
-  let cloudinaryPosterUrl = posterUrl;
   let cloudinaryPublicId = null;
 
-  if (posterBuffer && posterUrl) {
+  if (posterBuffer) {
     try {
       const posterResult = await uploadToCloudinary(posterBuffer, 'movies_posters', {
         resource_type: 'image',
         folder: 'movies_posters',
       });
-      cloudinaryPosterUrl = posterResult.secure_url;
       cloudinaryPublicId = posterResult.public_id;
     } catch (error) {
-      console.warn('Cloudinary poster upload failed, using original URL', error);
-      cloudinaryPublicId = null;
+      console.warn('Cloudinary poster upload failed', error);
     }
   }
 
@@ -91,7 +84,6 @@ export const addToFavorites = async (userId, movieData, posterBuffer = null) => 
       if (existingMovie.posterPublicId) {
         await destroyFromCloudinary(existingMovie.posterPublicId, { resource_type: 'image' }).catch(() => {});
       }
-      existingMovie.posterUrl = cloudinaryPosterUrl;
       existingMovie.posterPublicId = cloudinaryPublicId;
     }
     await existingMovie.save();
@@ -102,8 +94,8 @@ export const addToFavorites = async (userId, movieData, posterBuffer = null) => 
     userId,
     movieId,
     title,
-    posterUrl: cloudinaryPosterUrl || null,
-    posterPublicId: cloudinaryPublicId || null,
+    posterUrl: posterUrl || null,
+    posterPublicId: cloudinaryPublicId,
     releaseDate: releaseDate || null,
     rating: rating || null,
     overview: overview || null,
