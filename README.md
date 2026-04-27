@@ -49,6 +49,64 @@ src/
 See [API_ENDPOINTS.md](API_ENDPOINTS.md) for the complete list of all available endpoints.
 
 ### Main Endpoints
+Authentication (/api/auth):
+
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+POST /api/auth/refresh
+POST /api/auth/send-reset-email
+POST /api/auth/reset-pwd
+
+Audio (/api/audio):
+
+GET /api/audio
+POST /api/audio (з файлом)
+GET /api/audio/:audioId
+DELETE /api/audio/:audioId
+POST /api/audio/:audioId/duplicate
+
+Movies (/api/movies):
+
+GET /api/movies/watchlist
+POST /api/movies/watchlist (з постером)
+DELETE /api/movies/watchlist/:movieId
+GET /api/movies/favorites
+POST /api/movies/favorites (з постером)
+DELETE /api/movies/favorites/:movieId
+GET /api/movies/:movieId/status
+
+Books (/api/books):
+
+GET /api/books/favorites
+POST /api/books/favorites (з cover)
+DELETE /api/books/favorites/:bookId
+GET /api/books/read
+POST /api/books/read (з cover)
+DELETE /api/books/read/:bookId
+GET /api/books/:bookId/status
+
+Videos (/api/videos):
+
+GET /api/videos/favorites
+POST /api/videos/favorites (з cover)
+DELETE /api/videos/favorites/:videoId
+GET /api/videos/viewed
+POST /api/videos/viewed (з cover)
+DELETE /api/videos/viewed/:videoId
+GET /api/videos/:videoId/status
+
+Images (/api/images):
+
+GET /api/images/favorites
+POST /api/images/favorites (з cover)
+DELETE /api/images/favorites/:imageId
+GET /api/images/viewed
+POST /api/images/viewed (з cover)
+DELETE /api/images/viewed/:imageId
+GET /api/images/:imageId/status
+
+### Main Endpoints
 - `POST /api/auth/login` — user login
 - `POST /api/auth/register` — user registration
 - `GET /api/audio` — fetch audio files

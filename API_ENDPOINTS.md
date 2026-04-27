@@ -1,7 +1,7 @@
 # MediaShelf Backend API - Complete Endpoints List
 
 ## 📌 Overview
-This backend application provides **user authentication**, **audio file management**, **movie watchlist/favorites**, and **books integration**.
+This backend application provides **user authentication**, **audio file management**, **movie watchlist/favorites**, **books favorites/read**, **videos favorites/viewed**, and **images favorites/viewed**.
 
 ---
 
@@ -31,10 +31,37 @@ This backend application provides **user authentication**, **audio file manageme
 - `DELETE /api/movies/favorites/:movieId` – remove movie from favorites
 - `GET /api/movies/:movieId/status` – check if movie is in watchlist/favorites
 
-### Books Integration (`/api/books`)
-- `POST /api/books/auth` – get ReadJourney authentication token
-- `GET /api/books/recommend` – get recommended books from ReadJourney
-- `GET /api/books/:id` – get book details by ID from ReadJourney
+### Books Management (`/api/books`)
+- `GET /api/books/favorites` – get user's favorite books
+- `POST /api/books/favorites` – add book to favorites (multipart/form-data with cover)
+- `DELETE /api/books/favorites/:bookId` – remove book from favorites
+- `GET /api/books/read` – get user's read books
+- `POST /api/books/read` – add book to read list (multipart/form-data with cover)
+- `DELETE /api/books/read/:bookId` – remove book from read list
+- `GET /api/books/:bookId/status` – check if book is in favorites/read
+
+### Videos Management (`/api/videos`)
+- `GET /api/videos/favorites` – get user's favorite videos
+- `POST /api/videos/favorites` – add video to favorites (multipart/form-data with cover)
+- `DELETE /api/videos/favorites/:videoId` – remove video from favorites
+- `GET /api/videos/viewed` – get user's viewed videos
+- `POST /api/videos/viewed` – add video to viewed list (multipart/form-data with cover)
+- `DELETE /api/videos/viewed/:videoId` – remove video from viewed list
+- `GET /api/videos/:videoId/status` – check if video is in favorites/viewed
+
+### Images Management (`/api/images`)
+- `GET /api/images/favorites` – get user's favorite images
+- `POST /api/images/favorites` – add image to favorites (multipart/form-data with cover)
+- `DELETE /api/images/favorites/:imageId` – remove image from favorites
+- `GET /api/images/viewed` – get user's viewed images
+- `POST /api/images/viewed` – add image to viewed list (multipart/form-data with cover)
+- `DELETE /api/images/viewed/:imageId` – remove image from viewed list
+- `GET /api/images/:imageId/status` – check if image is in favorites/viewed
+
+### Books Integration (ReadJourney Proxy)
+- `POST /books/auth` – get ReadJourney authentication token
+- `GET /books/recommend` – get recommended books from ReadJourney
+- `GET /books/:id` – get book details by ID from ReadJourney
 
 ### General
 - `GET /` – health check endpoint

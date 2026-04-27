@@ -14,10 +14,26 @@ import { UsersCollection } from '../db/models/user.js';
 export const registerUserController = async (req, res) => {
   const user = await registerUser(req.body);
 
+  const session = await loginUser(req.body);
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
+    expires: new Date(Date.now() + ONE_DAY * 30),
+  };
+
+  res.cookie('refreshToken', session.refreshToken, cookieOptions);
+  res.cookie('sessionId', session._id, cookieOptions);
+
   res.status(201).json({
     status: 201,
     message: 'Successfully registered a user!',
-    data: user.toJSON(), 
+    data: {
+      user: user.toJSON(),
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+    },
   });
 };
 
