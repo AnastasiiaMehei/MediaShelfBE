@@ -1,12 +1,12 @@
 openapi: 3.0.1
 info:
   version: 1.0.0
-  title: Auth NodeJS
+  title: MediaShelf Backend API
+  description: |-
+    MediaShelf backend API documentation for authentication, audio uploads, movies, books, videos and images.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  description: |
-    Auth NodeJS
 servers:
   - url: http://localhost:3000
 tags:
@@ -14,8 +14,18 @@ tags:
     description: Operations related to authentication
   - name: audio
     description: Operations related to audio upload and playback
+  - name: movies
+    description: Operations related to movie watchlist and favorites
+  - name: books
+    description: Operations related to book favorites and read lists
+  - name: videos
+    description: Operations related to video favorites and viewed lists
+  - name: images
+    description: Operations related to image favorites and viewed lists
+  - name: readjourney
+    description: ReadJourney proxy operations for book recommendations
 paths:
-  /auth/register:
+  /api/auth/register:
     post:
       tags:
         - auth
@@ -34,7 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/AuthResponse'
         '400':
           $ref: '#/components/responses/IllegalInput'
         '409':
@@ -45,7 +55,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           $ref: '#/components/responses/GeneralError'
-  /auth/login:
+  /api/auth/login:
     post:
       tags:
         - auth
@@ -64,18 +74,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/AuthResponse'
         '400':
           $ref: '#/components/responses/IllegalInput'
         '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/GeneralError'
-  /auth/logout:
+  /api/auth/logout:
     post:
       tags:
         - auth
@@ -95,7 +101,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           $ref: '#/components/responses/GeneralError'
-  /auth/refresh:
+  /api/auth/refresh:
     post:
       tags:
         - auth
@@ -112,14 +118,10 @@ paths:
         '400':
           $ref: '#/components/responses/IllegalInput'
         '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/GeneralError'
-  /auth/send-reset-email:
+  /api/auth/send-reset-email:
     post:
       tags:
         - auth
@@ -147,7 +149,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           $ref: '#/components/responses/GeneralError'
-  /auth/reset-pwd:
+  /api/auth/reset-pwd:
     post:
       tags:
         - auth
@@ -168,11 +170,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
         '401':
-          description: Token is expired or invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Unauthorized'
         '404':
           description: User not found
           content:
@@ -181,7 +179,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           $ref: '#/components/responses/GeneralError'
-  /audio:
+  /api/audio:
     get:
       tags:
         - audio
@@ -262,7 +260,7 @@ paths:
           $ref: '#/components/responses/IllegalInput'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /audio/{audioId}:
+  /api/audio/{audioId}:
     get:
       tags:
         - audio
@@ -318,7 +316,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-  /audio/{audioId}/duplicate:
+  /api/audio/{audioId}/duplicate:
     post:
       tags:
         - audio
@@ -353,21 +351,1136 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+  /api/movies/watchlist:
+    get:
+      tags:
+        - movies
+      summary: Get movies watchlist
+      operationId: getWatchlistMovies
+      description: Get the authenticated user's watchlist movies.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved watchlist movies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Watchlist movies retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Movie'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - movies
+      summary: Add movie to watchlist
+      operationId: addToWatchlist
+      description: Add a movie to the authenticated user's watchlist.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - movieId
+                - title
+              properties:
+                movieId:
+                  type: string
+                title:
+                  type: string
+                posterUrl:
+                  type: string
+                releaseDate:
+                  type: string
+                  format: date
+                rating:
+                  type: number
+                overview:
+                  type: string
+                genres:
+                  type: array
+                  items:
+                    type: string
+                poster:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Movie added to watchlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Movie added to watchlist
+                  data:
+                    $ref: '#/components/schemas/Movie'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/movies/favorites:
+    get:
+      tags:
+        - movies
+      summary: Get favorite movies
+      operationId: getFavoriteMovies
+      description: Get the authenticated user's favorite movies.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved favorite movies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Favorite movies retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Movie'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - movies
+      summary: Add movie to favorites
+      operationId: addToFavorites
+      description: Add a movie to the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - movieId
+                - title
+              properties:
+                movieId:
+                  type: string
+                title:
+                  type: string
+                posterUrl:
+                  type: string
+                releaseDate:
+                  type: string
+                  format: date
+                rating:
+                  type: number
+                overview:
+                  type: string
+                genres:
+                  type: array
+                  items:
+                    type: string
+                poster:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Movie added to favorites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Movie added to favorites
+                  data:
+                    $ref: '#/components/schemas/Movie'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/movies/watchlist/{movieId}:
+    delete:
+      tags:
+        - movies
+      summary: Remove movie from watchlist
+      operationId: removeFromWatchlist
+      description: Remove a movie from the authenticated user's watchlist.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Movie removed from watchlist
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/movies/favorites/{movieId}:
+    delete:
+      tags:
+        - movies
+      summary: Remove movie from favorites
+      operationId: removeFromFavorites
+      description: Remove a movie from the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Movie removed from favorites
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/movies/{movieId}/status:
+    get:
+      tags:
+        - movies
+      summary: Check movie status
+      operationId: checkMovieStatus
+      description: Check if a movie is in watchlist or favorites.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Movie status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Movie status retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      isWatchlist:
+                        type: boolean
+                        example: true
+                      isFavorite:
+                        type: boolean
+                        example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/books/favorites:
+    get:
+      tags:
+        - books
+      summary: Get favorite books
+      operationId: getFavoriteBooks
+      description: Get the authenticated user's favorite books.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved favorite books
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Favorite books retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - books
+      summary: Add book to favorites
+      operationId: addToFavoriteBooks
+      description: Add a book to the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - bookId
+                - title
+              properties:
+                bookId:
+                  type: string
+                title:
+                  type: string
+                bookUrl:
+                  type: string
+                coverUrl:
+                  type: string
+                author:
+                  type: string
+                rating:
+                  type: number
+                description:
+                  type: string
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Book added to favorites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Book added to favorites
+                  data:
+                    $ref: '#/components/schemas/Book'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/books/read:
+    get:
+      tags:
+        - books
+      summary: Get read books
+      operationId: getReadBooks
+      description: Get the authenticated user's read books.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved read books
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Read books retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - books
+      summary: Add book to read list
+      operationId: addToReadBooks
+      description: Add a book to the authenticated user's read list.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - bookId
+                - title
+              properties:
+                bookId:
+                  type: string
+                title:
+                  type: string
+                bookUrl:
+                  type: string
+                coverUrl:
+                  type: string
+                author:
+                  type: string
+                rating:
+                  type: number
+                description:
+                  type: string
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Book added to read list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Book added to read list
+                  data:
+                    $ref: '#/components/schemas/Book'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/books/favorites/{bookId}:
+    delete:
+      tags:
+        - books
+      summary: Remove book from favorites
+      operationId: removeFromFavoriteBooks
+      description: Remove a book from the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Book removed from favorites
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/books/read/{bookId}:
+    delete:
+      tags:
+        - books
+      summary: Remove book from read list
+      operationId: removeFromReadBooks
+      description: Remove a book from the authenticated user's read list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Book removed from read list
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/books/{bookId}/status:
+    get:
+      tags:
+        - books
+      summary: Check book status
+      operationId: checkBookStatus
+      description: Check if a book is in favorites or read list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Book status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Book status retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      isFavorite:
+                        type: boolean
+                        example: true
+                      isRead:
+                        type: boolean
+                        example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/videos/favorites:
+    get:
+      tags:
+        - videos
+      summary: Get favorite videos
+      operationId: getFavoriteVideos
+      description: Get the authenticated user's favorite videos.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved favorite videos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Favorite videos retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Video'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - videos
+      summary: Add video to favorites
+      operationId: addToFavoriteVideos
+      description: Add a video to the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - videoId
+                - title
+                - videoUrl
+              properties:
+                videoId:
+                  type: string
+                title:
+                  type: string
+                videoUrl:
+                  type: string
+                description:
+                  type: string
+                duration:
+                  type: number
+                coverUrl:
+                  type: string
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Video added to favorites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Video added to favorites
+                  data:
+                    $ref: '#/components/schemas/Video'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/videos/viewed:
+    get:
+      tags:
+        - videos
+      summary: Get viewed videos
+      operationId: getViewedVideos
+      description: Get the authenticated user's viewed videos.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved viewed videos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Viewed videos retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Video'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - videos
+      summary: Add video to viewed list
+      operationId: addToViewedVideos
+      description: Add a video to the authenticated user's viewed list.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - videoId
+                - title
+                - videoUrl
+              properties:
+                videoId:
+                  type: string
+                title:
+                  type: string
+                videoUrl:
+                  type: string
+                description:
+                  type: string
+                duration:
+                  type: number
+                coverUrl:
+                  type: string
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Video added to viewed list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Video added to viewed list
+                  data:
+                    $ref: '#/components/schemas/Video'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/videos/favorites/{videoId}:
+    delete:
+      tags:
+        - videos
+      summary: Remove video from favorites
+      operationId: removeFromFavoriteVideos
+      description: Remove a video from the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Video removed from favorites
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/videos/viewed/{videoId}:
+    delete:
+      tags:
+        - videos
+      summary: Remove video from viewed list
+      operationId: removeFromViewedVideos
+      description: Remove a video from the authenticated user's viewed list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Video removed from viewed list
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/videos/{videoId}/status:
+    get:
+      tags:
+        - videos
+      summary: Check video status
+      operationId: checkVideoStatus
+      description: Check if a video is in favorites or viewed list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Video status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Video status retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      isFavorite:
+                        type: boolean
+                        example: true
+                      isViewed:
+                        type: boolean
+                        example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/images/favorites:
+    get:
+      tags:
+        - images
+      summary: Get favorite images
+      operationId: getFavoriteImages
+      description: Get the authenticated user's favorite images.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved favorite images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Favorite images retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Image'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - images
+      summary: Add image to favorites
+      operationId: addToFavoriteImages
+      description: Add an image to the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - imageId
+                - title
+                - imageUrl
+              properties:
+                imageId:
+                  type: string
+                title:
+                  type: string
+                imageUrl:
+                  type: string
+                description:
+                  type: string
+                coverUrl:
+                  type: string
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Image added to favorites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Image added to favorites
+                  data:
+                    $ref: '#/components/schemas/Image'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/images/viewed:
+    get:
+      tags:
+        - images
+      summary: Get viewed images
+      operationId: getViewedImages
+      description: Get the authenticated user's viewed images.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved viewed images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Viewed images retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Image'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - images
+      summary: Add image to viewed list
+      operationId: addToViewedImages
+      description: Add an image to the authenticated user's viewed list.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - imageId
+                - title
+                - imageUrl
+              properties:
+                imageId:
+                  type: string
+                title:
+                  type: string
+                imageUrl:
+                  type: string
+                description:
+                  type: string
+                coverUrl:
+                  type: string
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Image added to viewed list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Image added to viewed list
+                  data:
+                    $ref: '#/components/schemas/Image'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/images/favorites/{imageId}:
+    delete:
+      tags:
+        - images
+      summary: Remove image from favorites
+      operationId: removeFromFavoriteImages
+      description: Remove an image from the authenticated user's favorites.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Image removed from favorites
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/images/viewed/{imageId}:
+    delete:
+      tags:
+        - images
+      summary: Remove image from viewed list
+      operationId: removeFromViewedImages
+      description: Remove an image from the authenticated user's viewed list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Image removed from viewed list
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/images/{imageId}/status:
+    get:
+      tags:
+        - images
+      summary: Check image status
+      operationId: checkImageStatus
+      description: Check if an image is in favorites or viewed list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Image status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Image status retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      isFavorite:
+                        type: boolean
+                        example: true
+                      isViewed:
+                        type: boolean
+                        example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /books/auth:
+    post:
+      tags:
+        - readjourney
+      summary: Get ReadJourney auth token
+      operationId: readJourneyAuth
+      description: Authenticate to ReadJourney and receive an auth token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: ReadJourney authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  token:
+                    type: string
+                  refreshToken:
+                    type: string
+        '500':
+          description: Books auth failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /books/recommend:
+    get:
+      tags:
+        - readjourney
+      summary: Get recommended books
+      operationId: getReadJourneyRecommendations
+      description: Retrieve book recommendations from ReadJourney.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Recommended books retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  totalPages:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Failed to load books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /books/{id}:
+    get:
+      tags:
+        - readjourney
+      summary: Get book details from ReadJourney
+      operationId: getReadJourneyBookById
+      description: Retrieve book details from ReadJourney by ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Book details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  author:
+                    type: string
+                  description:
+                    type: string
+                  coverUrl:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Failed to load book details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   responses:
-    '401':
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: integer
-                example: 401
-              message:
-                type: string
-                example: Unauthorized
     IllegalInput:
       description: Illegal input for operation.
       content:
@@ -392,12 +1505,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    responses-NotFound:
-      description: Entity not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   schemas:
     RegisterUserRequest:
       type: object
@@ -417,10 +1524,46 @@ components:
           type: string
           format: password
           example: password123
-    UserResponse:
+    LoginUserRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: password123
+    SendResetEmailRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - password
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        password:
+          type: string
+          format: password
+          example: newpassword123
+    User:
       type: object
       properties:
-        id:
+        _id:
           type: string
           example: 60d0fe4f5311236168a109ca
         name:
@@ -430,19 +1573,68 @@ components:
           type: string
           format: email
           example: john.doe@example.com
+    AuthResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Successfully registered a user!
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            refreshToken:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    LoginResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Successfully logged in a user!
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            refreshToken:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Success
     ErrorResponse:
       type: object
       properties:
         status:
           type: integer
-          example: 404
+          example: 400
         message:
           type: string
-          example: Not Found
+          example: Bad Request
     Audio:
       type: object
       properties:
-        id:
+        _id:
           type: string
           example: 60d0fe4f5311236168a109ca
         userId:
@@ -453,10 +1645,10 @@ components:
           example: Chill Beat
         audioUrl:
           type: string
-          example: https://res.cloudinary.com/demo/raw/upload/v1234567890/audio/song.mp3
+          example: https://res.cloudinary.com/demo/raw/upload/v123/audio.mp3
         coverUrl:
           type: string
-          example: https://res.cloudinary.com/demo/image/upload/v1234567890/audio_covers/cover.jpg
+          example: https://res.cloudinary.com/demo/image/upload/v123/audio_covers/cover.jpg
         size:
           type: number
           example: 5120000
@@ -486,59 +1678,188 @@ components:
           type: string
           format: date-time
           example: 2026-04-22T10:00:00Z
-    LoginUserRequest:
-      type: object
-      required:
-        - email
-        - password
-      properties:
-        email:
-          type: string
-          format: email
-          example: john.doe@example.com
-        password:
-          type: string
-          format: password
-          example: password123
-    LoginResponse:
+    Movie:
       type: object
       properties:
-        accessToken:
+        _id:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-    SendResetEmailRequest:
+          example: 60d0fe4f5311236168a109ca
+        userId:
+          type: string
+          example: 60d0fe4f5311236168a109ca
+        movieId:
+          type: string
+          example: tt0111161
+        title:
+          type: string
+          example: The Shawshank Redemption
+        posterUrl:
+          type: string
+          example: https://res.cloudinary.com/demo/image/upload/v123/movie_poster.jpg
+        posterPublicId:
+          type: string
+          example: movie_poster_id
+        releaseDate:
+          type: string
+          example: 1994-09-23
+        rating:
+          type: number
+          example: 9.3
+        overview:
+          type: string
+          example: Two imprisoned men bond over a number of years...
+        genres:
+          type: array
+          items:
+            type: string
+        isWatchlist:
+          type: boolean
+          example: true
+        isFavorite:
+          type: boolean
+          example: false
+        addedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+    Book:
       type: object
-      required:
-        - email
       properties:
-        email:
+        _id:
           type: string
-          format: email
-          example: john.doe@example.com
-    SuccessResponse:
+          example: 60d0fe4f5311236168a109ca
+        userId:
+          type: string
+          example: 60d0fe4f5311236168a109ca
+        bookId:
+          type: string
+          example: OL66554W
+        title:
+          type: string
+          example: Pride and Prejudice
+        author:
+          type: string
+          example: Jane Austen
+        bookUrl:
+          type: string
+          example: https://openlibrary.org/books/OL66554W
+        coverUrl:
+          type: string
+          example: https://example.com/book-cover.jpg
+        coverPublicId:
+          type: string
+          example: book_cover_id
+        rating:
+          type: number
+          example: 4.8
+        description:
+          type: string
+          example: A classic novel of manners.
+        isFavorite:
+          type: boolean
+          example: true
+        isRead:
+          type: boolean
+          example: false
+        addedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+    Video:
       type: object
       properties:
-        status:
-          type: integer
-          example: 200
-        message:
+        _id:
           type: string
-          example: Success
-    ResetPasswordRequest:
+          example: 60d0fe4f5311236168a109ca
+        userId:
+          type: string
+          example: 60d0fe4f5311236168a109ca
+        videoId:
+          type: string
+          example: vid123
+        title:
+          type: string
+          example: Relaxing Nature
+        videoUrl:
+          type: string
+          example: https://example.com/videos/relaxing.mp4
+        coverUrl:
+          type: string
+          example: https://example.com/video-cover.jpg
+        coverPublicId:
+          type: string
+          example: video_cover_id
+        description:
+          type: string
+          example: A relaxing nature video.
+        duration:
+          type: number
+          example: 120
+        isFavorite:
+          type: boolean
+          example: true
+        isViewed:
+          type: boolean
+          example: false
+        addedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+    Image:
       type: object
-      required:
-        - token
-        - password
       properties:
-        token:
+        _id:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        password:
+          example: 60d0fe4f5311236168a109ca
+        userId:
           type: string
-          format: password
-          example: newpassword123
- 
+          example: 60d0fe4f5311236168a109ca
+        imageId:
+          type: string
+          example: img123
+        title:
+          type: string
+          example: Beach Sunset
+        imageUrl:
+          type: string
+          example: https://example.com/images/beach-sunset.jpg
+        coverUrl:
+          type: string
+          example: https://example.com/image-cover.jpg
+        coverPublicId:
+          type: string
+          example: image_cover_id
+        description:
+          type: string
+          example: A sunset over the ocean.
+        isFavorite:
+          type: boolean
+          example: true
+        isViewed:
+          type: boolean
+          example: false
+        addedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-22T10:00:00Z
   securitySchemes:
     bearerAuth:
       type: http
+      scheme: bearer
       scheme: bearer
