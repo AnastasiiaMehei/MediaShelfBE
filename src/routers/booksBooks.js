@@ -5,9 +5,7 @@ const router = express.Router();
 
 const API = "https://readjourney.b.goit.study";
 
-// ===============================
 // GET /books/recommend
-// ===============================
 router.get("/recommend", async (req, res) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
 
@@ -30,9 +28,7 @@ router.get("/recommend", async (req, res) => {
   }
 });
 
-// ===============================
 // GET /books/:id
-// ===============================
 router.get("/:id", async (req, res) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
   const { id } = req.params;

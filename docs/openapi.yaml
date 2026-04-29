@@ -9,6 +9,8 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: http://localhost:3000
+  - url: https://mediashelfbe.onrender.com
+  
 tags:
   - name: auth
     description: Operations related to authentication
@@ -1861,5 +1863,4 @@ components:
   securitySchemes:
     bearerAuth:
       type: http
-      scheme: bearer
       scheme: bearer

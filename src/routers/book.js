@@ -49,7 +49,6 @@ bookRouter.delete(
   ctrlWrapper(removeFromReadController),
 );
 
-// Перевірка статусу книги
 bookRouter.get(
   '/:bookId/status',
   ctrlWrapper(checkBookStatusController),
